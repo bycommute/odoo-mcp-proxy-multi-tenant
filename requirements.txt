@@ -1,0 +1,32 @@
+# FastAPI et serveur web
+fastapi
+uvicorn[standard]
+
+# MCP (Model Context Protocol)
+mcp>=1.9.0
+
+# Base de données
+sqlalchemy
+alembic
+
+# Authentification et sécurité
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Client Odoo
+requests
+
+# Utilitaires
+python-dotenv
+pydantic
+pydantic-settings
+
+# Logging
+loguru
+
+# HTTP client pour MCP
+httpx
+
+# FastMCP pour MCP Streamable HTTP
+fastmcp

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de connexion Odoo MCP - Configuration | Odoo MCP Proxy</title>
+    <meta name="description" content="Testez et configurez votre connexion Odoo MCP en quelques minutes. Interface simple et intuitive pour générer votre token API.">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/static/css/test.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="test-header">
+            <div class="header-content">
+                <a href="/" class="back-link">
+                    <span class="back-icon">←</span>
+                    Retour à l'accueil
+                </a>
+                <div class="header-title">
+                    <h1>🚀 Configuration Odoo MCP</h1>
+                    <p>Connectez votre instance Odoo à ChatGPT et autres agents IA</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="test-main">
+            <div class="card">
+                <h2>Configuration de votre instance Odoo</h2>
+                <p class="mb-4" style="color: var(--gray-600); font-size: 0.875rem;">
+                    Remplissez les informations de votre instance Odoo pour générer un token API et utiliser le protocole MCP.
+                </p>
+                
+                <form id="configForm">
+                    <div class="form-group">
+                        <label for="odooUrl">
+                            URL de votre instance Odoo <span class="required">*</span>
+                            <span class="help-text">ℹ️ Exemple: bycommute.odoo.com ou https://bycommute.odoo.com</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="odooUrl" 
+                            name="odooUrl" 
+                            placeholder="bycommute.odoo.com" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="odooDb">
+                            Nom de la base de données <span class="required">*</span>
+                            <span class="help-text">ℹ️ Le nom de votre base Odoo (sans espaces, souvent le nom de votre entreprise)</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="odooDb" 
+                            name="odooDb" 
+                            placeholder="nom_de_la_base" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="odooUsername">
+                            Email de connexion Odoo <span class="required">*</span>
+                            <span class="help-text">ℹ️ L'email que vous utilisez pour vous connecter à Odoo</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="odooUsername" 
+                            name="odooUsername" 
+                            placeholder="votre@email.com" 
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="odooPassword">
+                            Mot de passe Odoo <span class="required">*</span>
+                            <span class="help-text">ℹ️ Votre mot de passe de connexion Odoo</span>
+                        </label>
+                        <input 
+                            type="password" 
+                            id="odooPassword" 
+                            name="odooPassword" 
+                            placeholder="votre_mot_de_passe" 
+                            required
+                        >
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" id="testBtn" class="btn btn-secondary">
+                            🔍 Tester la connexion
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            ⚡ Générer le token API
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="testResult" class="card test-result hidden">
+                <h2>🔍 Test de connexion</h2>
+                <p id="testMessage"></p>
+            </div>
+
+            <div id="result" class="card hidden">
+                <h2>✅ Configuration réussie !</h2>
+                <div class="result-content">
+                    <div class="info-item">
+                        <strong>Token API :</strong>
+                        <code id="apiToken"></code>
+                        <button onclick="copyToken()" class="btn btn-copy">Copier</button>
+                    </div>
+                    <div class="info-item">
+                        <strong>URL MCP :</strong>
+                        <code id="mcpUrl"></code>
+                        <button onclick="copyUrl()" class="btn btn-copy">Copier</button>
+                    </div>
+                    <div class="info-item">
+                        <strong>ID Utilisateur :</strong>
+                        <code id="userId"></code>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Comment utiliser avec ChatGPT :</h3>
+                    <ol>
+                        <li>Copiez le <strong>Token API</strong> et l'<strong>URL MCP</strong> ci-dessus</li>
+                        <li>Dans ChatGPT, allez dans les paramètres et configurez un serveur MCP</li>
+                        <li>Utilisez l'URL MCP et le Token API comme identifiants</li>
+                        <li>Vous pourrez maintenant interagir avec votre Odoo via ChatGPT !</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div id="error" class="card error hidden">
+                <h2>❌ Erreur</h2>
+                <p id="errorMessage"></p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="test-footer">
+            <p>Odoo MCP Proxy Multi-Tenant v1.0.0</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/test.js"></script>
+</body>
+</html>

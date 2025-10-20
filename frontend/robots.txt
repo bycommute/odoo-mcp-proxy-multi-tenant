@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://odoo-mcp-proxy.com/sitemap.xml
+
+# Disallow test pages from indexing
+Disallow: /test
+Disallow: /api/
+Disallow: /mcp
+Disallow: /mcp/
+
+# Allow use cases
+Allow: /use-cases/

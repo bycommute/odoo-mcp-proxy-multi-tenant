@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support client intelligent avec Odoo MCP | Odoo MCP Proxy</title>
+    <meta name="description" content="Transformez votre support client avec l'IA. ChatGPT peut consulter les commandes, factures et historique client directement dans Odoo.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/static/css/landing.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/" style="text-decoration: none; color: inherit;">
+                    <span class="brand-icon">🚀</span>
+                    <span class="brand-text">Odoo MCP Proxy</span>
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a href="/#features" class="nav-link">Fonctionnalités</a>
+                <a href="/#how-it-works" class="nav-link">Comment ça marche</a>
+                <a href="/#pricing" class="nav-link">Tarifs</a>
+                <a href="/test" class="nav-link nav-cta">Tester maintenant</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Support client <span class="gradient-text">intelligent</span><br>
+                    avec Odoo et l'IA
+                </h1>
+                <p class="hero-description">
+                    Transformez votre support client avec ChatGPT. L'IA peut consulter les commandes, 
+                    factures et historique client directement dans votre instance Odoo.
+                </p>
+                <div class="hero-actions">
+                    <a href="/test" class="btn btn-primary btn-large">
+                        <span>🚀 Commencer maintenant</span>
+                    </a>
+                    <a href="/#use-cases" class="btn btn-secondary btn-large">
+                        <span>📖 Voir tous les cas d'usage</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <div class="card-header">
+                        <div class="card-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span class="card-title">Support Client IA</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="code-block">
+                            <span class="code-line">
+                                <span class="code-comment">// Client: "J'ai un problème avec ma commande #12345"</span>
+                            </span>
+                            <span class="code-line">
+                                <span class="code-comment">// ChatGPT consulte automatiquement Odoo:</span>
+                            </span>
+                            <span class="code-line">
+                                <span class="code-variable">const</span> 
+                                <span class="code-variable">commande</span> = 
+                                <span class="code-keyword">await</span> 
+                                <span class="code-method">odooClient</span>.
+                                <span class="code-method">search_read</span>({
+                            </span>
+                            <span class="code-line indent">
+                                <span class="code-property">model</span>: 
+                                <span class="code-string">"sale.order"</span>,
+                            </span>
+                            <span class="code-line indent">
+                                <span class="code-property">domain</span>: [[<span class="code-string">"name"</span>, <span class="code-string">"="</span>, <span class="code-string">"SO12345"</span>]]
+                            </span>
+                            <span class="code-line">});
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Fonctionnalités du support intelligent</h2>
+                <p class="section-description">
+                    Donnez à votre équipe support les super-pouvoirs de l'IA
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3 class="feature-title">Recherche instantanée</h3>
+                    <p class="feature-description">
+                        ChatGPT trouve instantanément les commandes, factures et tickets par numéro, email ou nom client.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Historique complet</h3>
+                    <p class="feature-description">
+                        Accès à tout l'historique client : commandes, factures, paiements, retours et communications.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="feature-title">Réponses contextuelles</h3>
+                    <p class="feature-description">
+                        L'IA comprend le contexte et fournit des réponses précises basées sur les données Odoo.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Résolution rapide</h3>
+                    <p class="feature-description">
+                        Réduction de 70% du temps de résolution des tickets grâce à l'accès instantané aux données.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Précision maximale</h3>
+                    <p class="feature-description">
+                        Plus d'erreurs de recherche manuelle. L'IA trouve toujours la bonne information.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Analytics intégrées</h3>
+                    <p class="feature-description">
+                        Suivez les performances de votre support avec des métriques détaillées.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Comment ça marche ?</h2>
+                <p class="section-description">
+                    Configuration en 3 étapes simples
+                </p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Connectez Odoo</h3>
+                        <p class="step-description">
+                            Configurez votre instance Odoo avec notre interface simple. 
+                            L'IA aura accès à tous les modules : Ventes, CRM, Comptabilité, etc.
+                        </p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Formez votre équipe</h3>
+                        <p class="step-description">
+                            Donnez à votre équipe support l'accès à ChatGPT avec votre configuration Odoo. 
+                            Ils peuvent maintenant poser des questions en langage naturel.
+                        </p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3 class="step-title">Résolvez plus vite</h3>
+                        <p class="step-description">
+                            Votre équipe peut maintenant demander "Trouve la commande #12345" 
+                            et obtenir instantanément toutes les informations pertinentes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Prêt à révolutionner votre support ?</h2>
+                <p class="cta-description">
+                    Rejoignez les entreprises qui ont déjà transformé leur support client avec l'IA
+                </p>
+                <div class="cta-actions">
+                    <a href="/test" class="btn btn-primary btn-large">
+                        <span>🚀 Tester maintenant</span>
+                    </a>
+                    <a href="/contact" class="btn btn-secondary btn-large">
+                        <span>💬 Voir une démo</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="brand">
+                        <span class="brand-icon">🚀</span>
+                        <span class="brand-text">Odoo MCP Proxy</span>
+                    </div>
+                    <p class="footer-description">
+                        Connectez Odoo à l'écosystème IA moderne avec le protocole MCP.
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4 class="footer-title">Produit</h4>
+                        <a href="/#features" class="footer-link">Fonctionnalités</a>
+                        <a href="/#pricing" class="footer-link">Tarifs</a>
+                        <a href="/docs" class="footer-link">Documentation</a>
+                        <a href="/api" class="footer-link">API</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4 class="footer-title">Cas d'usage</h4>
+                        <a href="/use-cases/support" class="footer-link">Support client</a>
+                        <a href="/use-cases/analytics" class="footer-link">Analytics</a>
+                        <a href="/use-cases/automation" class="footer-link">Automatisation</a>
+                        <a href="/use-cases" class="footer-link">Tous les cas d'usage</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4 class="footer-title">Entreprise</h4>
+                        <a href="/about" class="footer-link">À propos</a>
+                        <a href="/contact" class="footer-link">Contact</a>
+                        <a href="/privacy" class="footer-link">Confidentialité</a>
+                        <a href="/terms" class="footer-link">CGU</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">
+                    © 2024 Odoo MCP Proxy. Tous droits réservés.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/landing.js"></script>
+</body>
+</html>

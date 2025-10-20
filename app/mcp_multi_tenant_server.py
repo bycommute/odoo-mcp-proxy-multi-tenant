@@ -250,6 +250,72 @@ Site Web: {partner.get('website', 'N/A')}
         logger.error(f"Error getting partner details: {str(e)}")
         return f"Erreur lors de la récupération des détails du partenaire: {str(e)}"
 
+@mcp.tool()
+async def execute_odoo_method(
+    model: str,
+    method: str,
+    args: list = None,
+    kwargs: dict = None
+) -> str:
+    """🚀 UNIVERSAL ODOO TOOL - Execute any Odoo method on any model. This is the most powerful tool that gives full access to Odoo.
+    
+    This tool allows you to:
+    - Read data: search(), read(), search_read()
+    - Write data: create(), write(), unlink()
+    - Execute any custom method defined in Odoo
+    
+    Args:
+        model: Odoo model name (e.g., 'res.partner', 'product.product', 'sale.order', 'account.move')
+        method: Method to execute (e.g., 'search', 'read', 'create', 'write', 'unlink', 'search_read')
+        args: List of positional arguments for the method (optional)
+        kwargs: Dictionary of keyword arguments for the method (optional)
+    
+    Examples:
+        # Search partners
+        execute_odoo_method('res.partner', 'search', [[['is_company', '=', True]]], {'limit': 10})
+        
+        # Read partner data
+        execute_odoo_method('res.partner', 'read', [[1, 2, 3]], {'fields': ['name', 'email']})
+        
+        # Search and read in one call
+        execute_odoo_method('product.product', 'search_read', [[['type', '=', 'product']]], {'fields': ['name', 'list_price'], 'limit': 20})
+        
+        # Create a partner
+        execute_odoo_method('res.partner', 'create', [[{'name': 'New Partner', 'email': 'new@example.com'}]])
+        
+        # Update a partner
+        execute_odoo_method('res.partner', 'write', [[1], {'phone': '+33123456789'}])
+        
+        # Get sale orders
+        execute_odoo_method('sale.order', 'search_read', [[['state', '=', 'sale']]], {'fields': ['name', 'partner_id', 'amount_total']})
+    """
+    try:
+        odoo_client = getattr(execute_odoo_method, '_odoo_client', None)
+        if not odoo_client:
+            return "Erreur: Client Odoo non configuré"
+        
+        logger.info(f"Executing Odoo method: {model}.{method} with args={args}, kwargs={kwargs}")
+        
+        # Execute the method
+        result = odoo_client.execute_method(
+            model=model,
+            method=method,
+            args=args or [],
+            kwargs=kwargs or {}
+        )
+        
+        # Check for error
+        if isinstance(result, dict) and 'error' in result:
+            return f"Erreur Odoo: {result['error']}"
+        
+        # Format result
+        import json
+        return json.dumps(result, indent=2, ensure_ascii=False, default=str)
+        
+    except Exception as e:
+        logger.error(f"Error executing Odoo method: {str(e)}")
+        return f"Erreur: {str(e)}"
+
 # Create FastAPI app with MCP integration
 app = FastAPI(title="Odoo MCP Multi-Tenant Server")
 
@@ -435,6 +501,7 @@ async def mcp_endpoint_with_slash(request: Request):
                 setattr(search_products, '_odoo_client', odoo_client)
                 setattr(search_invoices, '_odoo_client', odoo_client)
                 setattr(get_partner_details, '_odoo_client', odoo_client)
+                setattr(execute_odoo_method, '_odoo_client', odoo_client)
                 
                 # Call the appropriate tool
                 if tool_name == "search_partners":
@@ -455,6 +522,13 @@ async def mcp_endpoint_with_slash(request: Request):
                 elif tool_name == "get_partner_details":
                     result = await get_partner_details(
                         partner_id=arguments.get("partner_id")
+                    )
+                elif tool_name == "execute_odoo_method":
+                    result = await execute_odoo_method(
+                        model=arguments.get("model"),
+                        method=arguments.get("method"),
+                        args=arguments.get("args"),
+                        kwargs=arguments.get("kwargs")
                     )
                 else:
                     return {
@@ -584,7 +658,7 @@ async def configure_odoo(config: OdooConfigRequest, db: Session = Depends(get_db
             "success": True,
             "message": "Configuration Odoo créée avec succès",
             "api_token": api_token,
-            "mcp_url": f"http://145.223.102.57:8000/mcp",  # Hostinger IP
+            "mcp_url": f"http://145.223.102.57/mcp",  # Hostinger IP (via Nginx)
             "user_id": user.user_id
         }
         

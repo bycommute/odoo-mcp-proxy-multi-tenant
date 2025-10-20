@@ -254,8 +254,8 @@ Site Web: {partner.get('website', 'N/A')}
 async def execute_odoo_method(
     model: str,
     method: str,
-    args: list = None,
-    kwargs: dict = None
+    args: Optional[list] = None,
+    kwargs: Optional[dict] = None
 ) -> str:
     """🚀 UNIVERSAL ODOO TOOL - Execute any Odoo method on any model. This is the most powerful tool that gives full access to Odoo.
     
@@ -466,6 +466,33 @@ async def mcp_endpoint_with_slash(request: Request):
                             "partner_id": {"type": "integer", "description": "ID of the partner"}
                         },
                         "required": ["partner_id"]
+                    }
+                },
+                {
+                    "name": "execute_odoo_method",
+                    "description": "🚀 UNIVERSAL ODOO TOOL - Execute any Odoo method on any model. Supports search, read, write, create, unlink, and all custom methods. This is the most powerful tool with full access to Odoo.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "model": {
+                                "type": "string", 
+                                "description": "Odoo model name (e.g., 'res.partner', 'product.product', 'sale.order', 'account.move', 'stock.picking')"
+                            },
+                            "method": {
+                                "type": "string",
+                                "description": "Method to execute (e.g., 'search', 'read', 'search_read', 'create', 'write', 'unlink', 'name_get', or any custom method)"
+                            },
+                            "args": {
+                                "type": "array",
+                                "description": "List of positional arguments for the method. For search: [[domain]], for read: [[ids]], for write: [[ids], {values}], for create: [[{values}]]",
+                                "items": {}
+                            },
+                            "kwargs": {
+                                "type": "object",
+                                "description": "Dictionary of keyword arguments (e.g., {'fields': ['name', 'email'], 'limit': 10, 'offset': 0, 'order': 'name asc'})"
+                            }
+                        },
+                        "required": ["model", "method"]
                     }
                 }
             ]

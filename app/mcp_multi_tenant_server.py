@@ -66,191 +66,6 @@ def get_odoo_client_from_token(token: str, db: Session) -> OdooClient:
     return user_sessions[token]
 
 @mcp.tool()
-async def search_partners(name: str = None, limit: int = 10) -> str:
-    """Search for partners in Odoo.
-    
-    Args:
-        name: Optional name to search for
-        limit: Maximum number of results to return
-    """
-    try:
-        # This will be set by the middleware
-        odoo_client = getattr(search_partners, '_odoo_client', None)
-        if not odoo_client:
-            return "Erreur: Client Odoo non configuré"
-            
-        logger.info(f"Searching partners with name: {name}, limit: {limit}")
-        
-        # Build search domain
-        domain = []
-        if name:
-            domain.append(('name', 'ilike', name))
-        
-        # Search partners
-        result = odoo_client.search_read(
-            'res.partner',
-            domain,
-            ['name', 'email', 'phone', 'is_company'],
-            limit=limit
-        )
-        
-        if not result:
-            return "Aucun partenaire trouvé."
-        
-        # Format results
-        partners = []
-        for partner in result:
-            partner_info = f"""
-Nom: {partner.get('name', 'N/A')}
-Email: {partner.get('email', 'N/A')}
-Téléphone: {partner.get('phone', 'N/A')}
-Type: {'Entreprise' if partner.get('is_company') else 'Particulier'}
-"""
-            partners.append(partner_info)
-        
-        return f"Partenaires trouvés ({len(partners)}):\n" + "\n---\n".join(partners)
-        
-    except Exception as e:
-        logger.error(f"Error searching partners: {str(e)}")
-        return f"Erreur lors de la recherche des partenaires: {str(e)}"
-
-@mcp.tool()
-async def search_products(name: str = None, limit: int = 10) -> str:
-    """Search for products in Odoo.
-    
-    Args:
-        name: Optional name to search for
-        limit: Maximum number of results to return
-    """
-    try:
-        odoo_client = getattr(search_products, '_odoo_client', None)
-        if not odoo_client:
-            return "Erreur: Client Odoo non configuré"
-            
-        logger.info(f"Searching products with name: {name}, limit: {limit}")
-        
-        # Build search domain
-        domain = []
-        if name:
-            domain.append(('name', 'ilike', name))
-        
-        # Search products
-        result = odoo_client.search_read(
-            'product.product',
-            domain,
-            ['name', 'list_price', 'default_code', 'type'],
-            limit=limit
-        )
-        
-        if not result:
-            return "Aucun produit trouvé."
-        
-        # Format results
-        products = []
-        for product in result:
-            product_info = f"""
-Nom: {product.get('name', 'N/A')}
-Code: {product.get('default_code', 'N/A')}
-Prix: {product.get('list_price', 0)} €
-Type: {product.get('type', 'N/A')}
-"""
-            products.append(product_info)
-        
-        return f"Produits trouvés ({len(products)}):\n" + "\n---\n".join(products)
-        
-    except Exception as e:
-        logger.error(f"Error searching products: {str(e)}")
-        return f"Erreur lors de la recherche des produits: {str(e)}"
-
-@mcp.tool()
-async def search_invoices(partner_name: str = None, limit: int = 10) -> str:
-    """Search for invoices in Odoo.
-    
-    Args:
-        partner_name: Optional partner name to filter by
-        limit: Maximum number of results to return
-    """
-    try:
-        odoo_client = getattr(search_invoices, '_odoo_client', None)
-        if not odoo_client:
-            return "Erreur: Client Odoo non configuré"
-            
-        logger.info(f"Searching invoices with partner: {partner_name}, limit: {limit}")
-        
-        # Build search domain
-        domain = []
-        if partner_name:
-            domain.append(('partner_id.name', 'ilike', partner_name))
-        
-        # Search invoices
-        result = odoo_client.search_read(
-            'account.move',
-            domain,
-            ['name', 'partner_id', 'amount_total', 'state', 'invoice_date'],
-            limit=limit
-        )
-        
-        if not result:
-            return "Aucune facture trouvée."
-        
-        # Format results
-        invoices = []
-        for invoice in result:
-            invoice_info = f"""
-Numéro: {invoice.get('name', 'N/A')}
-Client: {invoice.get('partner_id', ['N/A'])[1] if invoice.get('partner_id') else 'N/A'}
-Montant: {invoice.get('amount_total', 0)} €
-État: {invoice.get('state', 'N/A')}
-Date: {invoice.get('invoice_date', 'N/A')}
-"""
-            invoices.append(invoice_info)
-        
-        return f"Factures trouvées ({len(invoices)}):\n" + "\n---\n".join(invoices)
-        
-    except Exception as e:
-        logger.error(f"Error searching invoices: {str(e)}")
-        return f"Erreur lors de la recherche des factures: {str(e)}"
-
-@mcp.tool()
-async def get_partner_details(partner_id: int) -> str:
-    """Get detailed information about a specific partner.
-    
-    Args:
-        partner_id: ID of the partner to get details for
-    """
-    try:
-        odoo_client = getattr(get_partner_details, '_odoo_client', None)
-        if not odoo_client:
-            return "Erreur: Client Odoo non configuré"
-            
-        logger.info(f"Getting partner details for ID: {partner_id}")
-        
-        # Get partner details
-        partner = odoo_client.read(
-            'res.partner',
-            partner_id,
-            ['name', 'email', 'phone', 'street', 'city', 'zip', 'country_id', 'vat', 'website']
-        )
-        
-        if not partner:
-            return f"Aucun partenaire trouvé avec l'ID {partner_id}."
-        
-        # Format result
-        return f"""
-Détails du partenaire (ID: {partner_id}):
-Nom: {partner.get('name', 'N/A')}
-Email: {partner.get('email', 'N/A')}
-Téléphone: {partner.get('phone', 'N/A')}
-Adresse: {partner.get('street', 'N/A')}, {partner.get('zip', 'N/A')} {partner.get('city', 'N/A')} ({partner.get('country_id', [None, 'N/A'])[1]})
-TVA: {partner.get('vat', 'N/A')}
-Site Web: {partner.get('website', 'N/A')}
-"""
-        
-    except Exception as e:
-        logger.error(f"Error getting partner details: {str(e)}")
-        return f"Erreur lors de la récupération des détails du partenaire: {str(e)}"
-
-@mcp.tool()
 async def execute_odoo_method(
     model: str,
     method: str,
@@ -347,10 +162,8 @@ async def mcp_auth_middleware(request: Request, call_next):
             # Get Odoo client
             odoo_client = get_odoo_client_from_token(token, db)
             
-            # Set Odoo client for tools
-            search_partners._odoo_client = odoo_client
-            search_products._odoo_client = odoo_client
-            search_invoices._odoo_client = odoo_client
+            # Set Odoo client for the universal tool
+            execute_odoo_method._odoo_client = odoo_client
             
         except Exception as e:
             from fastapi.responses import JSONResponse
@@ -422,52 +235,8 @@ async def mcp_endpoint_with_slash(request: Request):
             }
         
         elif method == "tools/list":
-            # Return list of available tools
+            # Return list of available tools - Only the universal tool
             tools = [
-                {
-                    "name": "search_partners",
-                    "description": "Search for partners in Odoo",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string", "description": "Name to search for"},
-                            "limit": {"type": "integer", "description": "Maximum number of results"}
-                        }
-                    }
-                },
-                {
-                    "name": "search_products", 
-                    "description": "Search for products in Odoo",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string", "description": "Name to search for"},
-                            "limit": {"type": "integer", "description": "Maximum number of results"}
-                        }
-                    }
-                },
-                {
-                    "name": "search_invoices",
-                    "description": "Search for invoices in Odoo", 
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "partner_name": {"type": "string", "description": "Partner name to filter by"},
-                            "limit": {"type": "integer", "description": "Maximum number of results"}
-                        }
-                    }
-                },
-                {
-                    "name": "get_partner_details",
-                    "description": "Get detailed information about a specific partner",
-                    "inputSchema": {
-                        "type": "object", 
-                        "properties": {
-                            "partner_id": {"type": "integer", "description": "ID of the partner"}
-                        },
-                        "required": ["partner_id"]
-                    }
-                },
                 {
                     "name": "execute_odoo_method",
                     "description": "🚀 UNIVERSAL ODOO TOOL - Execute any Odoo method on any model. Supports search, read, write, create, unlink, and all custom methods. This is the most powerful tool with full access to Odoo.",
@@ -523,34 +292,11 @@ async def mcp_endpoint_with_slash(request: Request):
             try:
                 odoo_client = get_odoo_client_from_token(token, db)
                 
-                # Set Odoo client for tools
-                setattr(search_partners, '_odoo_client', odoo_client)
-                setattr(search_products, '_odoo_client', odoo_client)
-                setattr(search_invoices, '_odoo_client', odoo_client)
-                setattr(get_partner_details, '_odoo_client', odoo_client)
+                # Set Odoo client for the universal tool
                 setattr(execute_odoo_method, '_odoo_client', odoo_client)
                 
-                # Call the appropriate tool
-                if tool_name == "search_partners":
-                    result = await search_partners(
-                        name=arguments.get("name"),
-                        limit=arguments.get("limit", 10)
-                    )
-                elif tool_name == "search_products":
-                    result = await search_products(
-                        name=arguments.get("name"),
-                        limit=arguments.get("limit", 10)
-                    )
-                elif tool_name == "search_invoices":
-                    result = await search_invoices(
-                        partner_name=arguments.get("partner_name"),
-                        limit=arguments.get("limit", 10)
-                    )
-                elif tool_name == "get_partner_details":
-                    result = await get_partner_details(
-                        partner_id=arguments.get("partner_id")
-                    )
-                elif tool_name == "execute_odoo_method":
+                # Call the universal tool
+                if tool_name == "execute_odoo_method":
                     result = await execute_odoo_method(
                         model=arguments.get("model"),
                         method=arguments.get("method"),

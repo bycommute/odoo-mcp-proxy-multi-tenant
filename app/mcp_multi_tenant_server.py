@@ -5,9 +5,9 @@ import argparse
 import uvicorn
 import sys
 import os
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 from mcp.server.fastmcp import FastMCP
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, Header
 from sqlalchemy.orm import Session
 
 # Add the parent directory to the path
@@ -542,6 +542,192 @@ async def test_odoo_connection(config: OdooConfigRequest):
             "success": False,
             "message": f"Erreur lors du test de connexion: {str(e)}"
         }
+
+# REST API endpoints for Make.com and other integrations
+class OdooMethodRequest(BaseModel):
+    model: str
+    method: str
+    domain: Optional[str] = None
+    fields: Optional[str] = None
+    limit: Optional[int] = None
+    ids: Optional[str] = None
+    values: Optional[str] = None
+
+class OdooMethodResponse(BaseModel):
+    success: bool
+    data: Optional[Any] = None
+    error: Optional[str] = None
+
+@app.post("/api/odoo/execute", response_model=OdooMethodResponse)
+async def execute_odoo_rest(
+    request: OdooMethodRequest,
+    authorization: str = Header(None),
+    db: Session = Depends(get_db)
+):
+    """
+    🚀 REST API endpoint for Make.com and other integrations
+    
+    Execute any Odoo method via simple HTTP POST request.
+    No MCP protocol needed - just standard REST API!
+    
+    **Authentication:**
+    - Header: `Authorization: Bearer YOUR_API_TOKEN`
+    
+    **Examples:**
+    
+    1. Search partners:
+    ```bash
+    curl -X POST http://145.223.102.57/api/odoo/execute \\
+      -H "Authorization: Bearer YOUR_TOKEN" \\
+      -H "Content-Type: application/json" \\
+      -d '{
+        "model": "res.partner",
+        "method": "search_read",
+        "domain": "[[\"is_company\", \"=\", true]]",
+        "fields": "name,email,phone",
+        "limit": 10
+      }'
+    ```
+    
+    2. Read specific records:
+    ```bash
+    curl -X POST http://145.223.102.57/api/odoo/execute \\
+      -H "Authorization: Bearer YOUR_TOKEN" \\
+      -H "Content-Type: application/json" \\
+      -d '{
+        "model": "res.partner",
+        "method": "read",
+        "ids": "1,2,3",
+        "fields": "name,email"
+      }'
+    ```
+    
+    3. Create a record:
+    ```bash
+    curl -X POST http://145.223.102.57/api/odoo/execute \\
+      -H "Authorization: Bearer YOUR_TOKEN" \\
+      -H "Content-Type: application/json" \\
+      -d '{
+        "model": "res.partner",
+        "method": "create",
+        "values": "{\"name\": \"John Doe\", \"email\": \"john@example.com\"}"
+      }'
+    ```
+    
+    4. Update a record:
+    ```bash
+    curl -X POST http://145.223.102.57/api/odoo/execute \\
+      -H "Authorization: Bearer YOUR_TOKEN" \\
+      -H "Content-Type: application/json" \\
+      -d '{
+        "model": "res.partner",
+        "method": "write",
+        "ids": "123",
+        "values": "{\"phone\": \"+33123456789\"}"
+      }'
+    ```
+    """
+    try:
+        # Check authorization header
+        if not authorization or not authorization.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+        
+        token = authorization.split(" ", 1)[1]
+        
+        # Get Odoo client
+        try:
+            odoo_client = get_odoo_client_from_token(token, db)
+        except HTTPException:
+            raise HTTPException(status_code=401, detail="Invalid API token")
+        
+        # Build arguments based on method
+        import json
+        args = []
+        kwargs = {}
+        
+        if request.method in ['search', 'search_read']:
+            # Parse domain
+            if request.domain:
+                try:
+                    parsed_domain = json.loads(request.domain)
+                    args.append(parsed_domain)
+                except:
+                    args.append([])
+            else:
+                args.append([])
+            
+            # Add kwargs
+            if request.fields:
+                kwargs['fields'] = [f.strip() for f in request.fields.split(',')]
+            if request.limit:
+                kwargs['limit'] = request.limit
+            elif request.limit is None:
+                kwargs['limit'] = 10  # Default limit
+                
+        elif request.method == 'read':
+            # Parse IDs
+            if request.ids:
+                id_list = [int(i.strip()) for i in request.ids.split(',')]
+                args.append(id_list)
+            else:
+                return OdooMethodResponse(success=False, error="'ids' requis pour la méthode 'read'")
+            
+            if request.fields:
+                kwargs['fields'] = [f.strip() for f in request.fields.split(',')]
+                
+        elif request.method == 'create':
+            # Parse values
+            if request.values:
+                try:
+                    parsed_values = json.loads(request.values)
+                    args.append([parsed_values])
+                except Exception as e:
+                    return OdooMethodResponse(success=False, error=f"Erreur lors du parsing de 'values': {str(e)}")
+            else:
+                return OdooMethodResponse(success=False, error="'values' requis pour la méthode 'create'")
+                
+        elif request.method == 'write':
+            # Parse IDs and values
+            if not request.ids:
+                return OdooMethodResponse(success=False, error="'ids' requis pour la méthode 'write'")
+            if not request.values:
+                return OdooMethodResponse(success=False, error="'values' requis pour la méthode 'write'")
+            
+            try:
+                id_list = [int(i.strip()) for i in request.ids.split(',')]
+                parsed_values = json.loads(request.values)
+                args.append(id_list)
+                args.append(parsed_values)
+            except Exception as e:
+                return OdooMethodResponse(success=False, error=f"Erreur lors du parsing: {str(e)}")
+                
+        elif request.method == 'unlink':
+            # Parse IDs
+            if request.ids:
+                id_list = [int(i.strip()) for i in request.ids.split(',')]
+                args.append(id_list)
+            else:
+                return OdooMethodResponse(success=False, error="'ids' requis pour la méthode 'unlink'")
+        
+        # Execute the method
+        result = odoo_client.execute_method(
+            model=request.model,
+            method=request.method,
+            args=args,
+            kwargs=kwargs
+        )
+        
+        # Check for error
+        if isinstance(result, dict) and 'error' in result:
+            return OdooMethodResponse(success=False, error=str(result['error']))
+        
+        return OdooMethodResponse(success=True, data=result)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error executing Odoo method via REST API: {str(e)}")
+        return OdooMethodResponse(success=False, error=str(e))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run MCP Multi-Tenant server")

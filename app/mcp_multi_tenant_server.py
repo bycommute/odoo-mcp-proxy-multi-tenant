@@ -69,54 +69,114 @@ def get_odoo_client_from_token(token: str, db: Session) -> OdooClient:
 async def execute_odoo_method(
     model: str,
     method: str,
-    args: Optional[list] = None,
-    kwargs: Optional[dict] = None
+    domain: Optional[str] = None,
+    fields: Optional[str] = None,
+    limit: Optional[int] = None,
+    ids: Optional[str] = None,
+    values: Optional[str] = None
 ) -> str:
-    """🚀 UNIVERSAL ODOO TOOL - Execute any Odoo method on any model. This is the most powerful tool that gives full access to Odoo.
+    """🚀 UNIVERSAL ODOO TOOL - Execute any Odoo method on any model.
     
     This tool allows you to:
-    - Read data: search(), read(), search_read()
-    - Write data: create(), write(), unlink()
-    - Execute any custom method defined in Odoo
+    - search_read: Search and read records with domain filter
+    - search: Search for record IDs
+    - read: Read specific records by IDs
+    - create: Create new records
+    - write: Update existing records
+    - unlink: Delete records
     
     Args:
-        model: Odoo model name (e.g., 'res.partner', 'product.product', 'sale.order', 'account.move')
-        method: Method to execute (e.g., 'search', 'read', 'create', 'write', 'unlink', 'search_read')
-        args: List of positional arguments for the method (optional)
-        kwargs: Dictionary of keyword arguments for the method (optional)
-    
-    Examples:
-        # Search partners
-        execute_odoo_method('res.partner', 'search', [[['is_company', '=', True]]], {'limit': 10})
-        
-        # Read partner data
-        execute_odoo_method('res.partner', 'read', [[1, 2, 3]], {'fields': ['name', 'email']})
-        
-        # Search and read in one call
-        execute_odoo_method('product.product', 'search_read', [[['type', '=', 'product']]], {'fields': ['name', 'list_price'], 'limit': 20})
-        
-        # Create a partner
-        execute_odoo_method('res.partner', 'create', [[{'name': 'New Partner', 'email': 'new@example.com'}]])
-        
-        # Update a partner
-        execute_odoo_method('res.partner', 'write', [[1], {'phone': '+33123456789'}])
-        
-        # Get sale orders
-        execute_odoo_method('sale.order', 'search_read', [[['state', '=', 'sale']]], {'fields': ['name', 'partner_id', 'amount_total']})
+        model: Odoo model name (e.g., 'res.partner', 'product.product', 'sale.order')
+        method: Method to execute ('search_read', 'search', 'read', 'create', 'write', 'unlink')
+        domain: Search domain as JSON string (for search/search_read). Ex: "[[\"is_company\", \"=\", true]]"
+        fields: Comma-separated fields to return (for search_read/read). Ex: "name,email,phone"
+        limit: Max number of records (for search/search_read). Default: 10
+        ids: Comma-separated IDs (for read/write/unlink). Ex: "1,2,3"
+        values: Values as JSON string (for create/write). Ex: "{\"name\": \"John\", \"email\": \"john@example.com\"}"
     """
     try:
+        import json
+        
         odoo_client = getattr(execute_odoo_method, '_odoo_client', None)
         if not odoo_client:
             return "Erreur: Client Odoo non configuré"
         
-        logger.info(f"Executing Odoo method: {model}.{method} with args={args}, kwargs={kwargs}")
+        logger.info(f"Executing Odoo method: {model}.{method}")
+        
+        # Build arguments based on method
+        args = []
+        kwargs = {}
+        
+        if method in ['search', 'search_read']:
+            # Parse domain
+            if domain:
+                try:
+                    parsed_domain = json.loads(domain)
+                    args.append(parsed_domain)
+                except:
+                    args.append([])
+            else:
+                args.append([])
+            
+            # Add kwargs
+            if fields:
+                kwargs['fields'] = [f.strip() for f in fields.split(',')]
+            if limit:
+                kwargs['limit'] = limit
+            elif limit is None:
+                kwargs['limit'] = 10  # Default limit
+                
+        elif method == 'read':
+            # Parse IDs
+            if ids:
+                id_list = [int(i.strip()) for i in ids.split(',')]
+                args.append(id_list)
+            else:
+                return "Erreur: 'ids' requis pour la méthode 'read'"
+            
+            if fields:
+                kwargs['fields'] = [f.strip() for f in fields.split(',')]
+                
+        elif method == 'create':
+            # Parse values
+            if values:
+                try:
+                    parsed_values = json.loads(values)
+                    args.append([parsed_values])
+                except Exception as e:
+                    return f"Erreur lors du parsing de 'values': {str(e)}"
+            else:
+                return "Erreur: 'values' requis pour la méthode 'create'"
+                
+        elif method == 'write':
+            # Parse IDs and values
+            if not ids:
+                return "Erreur: 'ids' requis pour la méthode 'write'"
+            if not values:
+                return "Erreur: 'values' requis pour la méthode 'write'"
+            
+            try:
+                id_list = [int(i.strip()) for i in ids.split(',')]
+                parsed_values = json.loads(values)
+                args.append(id_list)
+                args.append(parsed_values)
+            except Exception as e:
+                return f"Erreur lors du parsing: {str(e)}"
+                
+        elif method == 'unlink':
+            # Parse IDs
+            if ids:
+                id_list = [int(i.strip()) for i in ids.split(',')]
+                args.append(id_list)
+            else:
+                return "Erreur: 'ids' requis pour la méthode 'unlink'"
         
         # Execute the method
         result = odoo_client.execute_method(
             model=model,
             method=method,
-            args=args or [],
-            kwargs=kwargs or {}
+            args=args,
+            kwargs=kwargs
         )
         
         # Check for error
@@ -124,7 +184,6 @@ async def execute_odoo_method(
             return f"Erreur Odoo: {result['error']}"
         
         # Format result
-        import json
         return json.dumps(result, indent=2, ensure_ascii=False, default=str)
         
     except Exception as e:
@@ -249,16 +308,27 @@ async def mcp_endpoint_with_slash(request: Request):
                             },
                             "method": {
                                 "type": "string",
-                                "description": "Method to execute (e.g., 'search', 'read', 'search_read', 'create', 'write', 'unlink', 'name_get', or any custom method)"
+                                "description": "Method to execute (e.g., 'search_read', 'search', 'read', 'create', 'write', 'unlink')"
                             },
-                            "args": {
-                                "type": "array",
-                                "description": "List of positional arguments for the method. For search: [[domain]], for read: [[ids]], for write: [[ids], {values}], for create: [[{values}]]",
-                                "items": {}
+                            "domain": {
+                                "type": "string",
+                                "description": "Search domain as JSON string. Example: \"[[\\\"is_company\\\", \\\"=\\\", true]]\" or \"[]\" for all records"
                             },
-                            "kwargs": {
-                                "type": "object",
-                                "description": "Dictionary of keyword arguments (e.g., {'fields': ['name', 'email'], 'limit': 10, 'offset': 0, 'order': 'name asc'})"
+                            "fields": {
+                                "type": "string",
+                                "description": "Comma-separated list of fields to return. Example: \"name,email,phone\" or leave empty for all fields"
+                            },
+                            "limit": {
+                                "type": "integer",
+                                "description": "Maximum number of records to return. Default: 10"
+                            },
+                            "ids": {
+                                "type": "string",
+                                "description": "Comma-separated list of record IDs for read/write/unlink. Example: \"1,2,3\""
+                            },
+                            "values": {
+                                "type": "string",
+                                "description": "Values to create/write as JSON string. Example: \"{\\\"name\\\": \\\"John\\\", \\\"email\\\": \\\"john@example.com\\\"}\""
                             }
                         },
                         "required": ["model", "method"]
@@ -300,8 +370,11 @@ async def mcp_endpoint_with_slash(request: Request):
                     result = await execute_odoo_method(
                         model=arguments.get("model"),
                         method=arguments.get("method"),
-                        args=arguments.get("args"),
-                        kwargs=arguments.get("kwargs")
+                        domain=arguments.get("domain"),
+                        fields=arguments.get("fields"),
+                        limit=arguments.get("limit"),
+                        ids=arguments.get("ids"),
+                        values=arguments.get("values")
                     )
                 else:
                     return {

@@ -128,9 +128,37 @@ function hideAllResults() {
 }
 
 function showSuccess(result) {
-    document.getElementById('apiToken').textContent = result.api_token;
-    document.getElementById('mcpUrl').textContent = result.mcp_url;
+    const apiToken = result.api_token;
+    const mcpUrl = result.mcp_url;
+    const restUrl = 'http://145.223.102.57/api/odoo/execute';
+    
+    // Remplir les champs de base
+    document.getElementById('apiToken').textContent = apiToken;
     document.getElementById('userId').textContent = result.user_id;
+    
+    // Mode 1: MCP pour agents IA
+    document.getElementById('mcpUrl').textContent = mcpUrl;
+    document.getElementById('mcpAuth').textContent = `Authorization: Bearer ${apiToken}`;
+    
+    // Mode 2: REST API
+    document.getElementById('restUrl').textContent = restUrl;
+    document.getElementById('restAuth').textContent = `Authorization: Bearer ${apiToken}`;
+    
+    // Exemple cURL
+    const curlExample = `curl -X POST ${restUrl} \\
+  -H "Authorization: Bearer ${apiToken}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "res.partner",
+    "method": "search_read",
+    "domain": "[[\\"is_company\\", \\"=\\", true]]",
+    "fields": "name,email,phone",
+    "limit": 10
+  }'`;
+    
+    document.getElementById('curlExample').textContent = curlExample;
+    
+    // Afficher le div de résultat
     document.getElementById('result').classList.remove('hidden');
     
     // Faire défiler vers le résultat
@@ -181,9 +209,29 @@ function copyToken() {
     copyToClipboard(token, 'Token API copié !');
 }
 
-function copyUrl() {
+function copyMcpUrl() {
     const url = document.getElementById('mcpUrl').textContent;
     copyToClipboard(url, 'URL MCP copiée !');
+}
+
+function copyMcpAuth() {
+    const auth = document.getElementById('mcpAuth').textContent;
+    copyToClipboard(auth, 'Header MCP copié !');
+}
+
+function copyRestUrl() {
+    const url = document.getElementById('restUrl').textContent;
+    copyToClipboard(url, 'URL REST API copiée !');
+}
+
+function copyRestAuth() {
+    const auth = document.getElementById('restAuth').textContent;
+    copyToClipboard(auth, 'Header REST API copié !');
+}
+
+function copyCurlExample() {
+    const example = document.getElementById('curlExample').textContent;
+    copyToClipboard(example, 'Exemple cURL copié !');
 }
 
 function copyToClipboard(text, message) {

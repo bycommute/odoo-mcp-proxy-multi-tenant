@@ -112,31 +112,123 @@
 
             <div id="result" class="card hidden">
                 <h2>✅ Configuration réussie !</h2>
+                
                 <div class="result-content">
-                    <div class="info-item">
-                        <strong>Token API :</strong>
-                        <code id="apiToken"></code>
-                        <button onclick="copyToken()" class="btn btn-copy">Copier</button>
+                    <div class="info-item token-highlight">
+                        <strong>🔑 Votre Token API :</strong>
+                        <div class="token-display">
+                            <code id="apiToken" class="token-code"></code>
+                            <button onclick="copyToken()" class="btn btn-copy">📋 Copier</button>
+                        </div>
+                        <p class="help-text">⚠️ Gardez ce token secret ! Il donne accès à votre Odoo.</p>
                     </div>
+                    
                     <div class="info-item">
-                        <strong>URL MCP :</strong>
-                        <code id="mcpUrl"></code>
-                        <button onclick="copyUrl()" class="btn btn-copy">Copier</button>
-                    </div>
-                    <div class="info-item">
-                        <strong>ID Utilisateur :</strong>
-                        <code id="userId"></code>
+                        <strong>🆔 ID Utilisateur :</strong>
+                        <code id="userId" class="small-code"></code>
                     </div>
                 </div>
                 
-                <div class="instructions">
-                    <h3>Comment utiliser avec ChatGPT :</h3>
-                    <ol>
-                        <li>Copiez le <strong>Token API</strong> et l'<strong>URL MCP</strong> ci-dessus</li>
-                        <li>Dans ChatGPT, allez dans les paramètres et configurez un serveur MCP</li>
-                        <li>Utilisez l'URL MCP et le Token API comme identifiants</li>
-                        <li>Vous pourrez maintenant interagir avec votre Odoo via ChatGPT !</li>
-                    </ol>
+                <div class="usage-modes">
+                    <h3>💡 Deux façons d'utiliser votre connexion Odoo :</h3>
+                    
+                    <!-- Mode 1: MCP pour agents IA -->
+                    <div class="usage-card mode-mcp">
+                        <div class="mode-header">
+                            <span class="mode-icon">🤖</span>
+                            <div>
+                                <h4>Mode 1 : Agents IA (MCP)</h4>
+                                <p class="mode-desc">Pour ChatGPT, OpenAI, Claude et autres agents IA</p>
+                            </div>
+                        </div>
+                        
+                        <div class="config-item">
+                            <label>URL du serveur MCP :</label>
+                            <div class="copy-field">
+                                <code id="mcpUrl" class="url-code"></code>
+                                <button onclick="copyMcpUrl()" class="btn btn-copy-small">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="config-item">
+                            <label>Header d'authentification :</label>
+                            <div class="copy-field">
+                                <code id="mcpAuth" class="auth-code"></code>
+                                <button onclick="copyMcpAuth()" class="btn btn-copy-small">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="how-to">
+                            <strong>📖 Configuration OpenAI Agent Builder :</strong>
+                            <ol>
+                                <li>Ouvrez <strong>Agent Builder</strong> → <strong>Actions</strong> → <strong>Add MCP server</strong></li>
+                                <li>Type: <code>Hosted MCP Server</code></li>
+                                <li>URL: Copiez l'URL ci-dessus</li>
+                                <li>Authentication: Copiez le header ci-dessus</li>
+                                <li>Cliquez sur <strong>Connect</strong></li>
+                            </ol>
+                            <a href="https://github.com/bycommute/odoo-mcp-proxy-multi-tenant/blob/main/docs/OPENAI_CONFIGURATION.md" target="_blank" class="doc-link">
+                                📚 Guide complet OpenAI →
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Mode 2: REST API pour Make.com, Zapier, etc. -->
+                    <div class="usage-card mode-rest">
+                        <div class="mode-header">
+                            <span class="mode-icon">🔌</span>
+                            <div>
+                                <h4>Mode 2 : REST API</h4>
+                                <p class="mode-desc">Pour Make.com, Zapier, n8n, cURL et autres outils d'automatisation</p>
+                            </div>
+                        </div>
+                        
+                        <div class="config-item">
+                            <label>Endpoint API :</label>
+                            <div class="copy-field">
+                                <code id="restUrl" class="url-code"></code>
+                                <button onclick="copyRestUrl()" class="btn btn-copy-small">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="config-item">
+                            <label>Header d'authentification :</label>
+                            <div class="copy-field">
+                                <code id="restAuth" class="auth-code"></code>
+                                <button onclick="copyRestAuth()" class="btn btn-copy-small">📋</button>
+                            </div>
+                        </div>
+                        
+                        <div class="example-request">
+                            <strong>📝 Exemple de requête (rechercher des clients) :</strong>
+                            <pre><code id="curlExample"></code></pre>
+                            <button onclick="copyCurlExample()" class="btn btn-copy-small">📋 Copier</button>
+                        </div>
+                        
+                        <div class="how-to">
+                            <strong>📖 Configuration Make.com :</strong>
+                            <ol>
+                                <li>Ajoutez un module <strong>HTTP → Make a request</strong></li>
+                                <li>URL: Copiez l'endpoint ci-dessus</li>
+                                <li>Method: <code>POST</code></li>
+                                <li>Headers: Ajoutez le header d'authentification</li>
+                                <li>Body: Utilisez l'exemple JSON ci-dessus</li>
+                            </ol>
+                            <a href="https://github.com/bycommute/odoo-mcp-proxy-multi-tenant/blob/main/docs/MAKE_COM_INTEGRATION.md" target="_blank" class="doc-link">
+                                📚 Guide complet Make.com →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="security-warning">
+                    <h4>🔒 Sécurité</h4>
+                    <ul>
+                        <li>✅ Ne partagez <strong>jamais</strong> votre token API</li>
+                        <li>✅ Utilisez <strong>HTTPS en production</strong> (recommandé)</li>
+                        <li>✅ Révoqué immédiatement un token compromis</li>
+                        <li>✅ Créez un token différent par intégration</li>
+                    </ul>
                 </div>
             </div>
 
